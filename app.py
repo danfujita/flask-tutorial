@@ -1,5 +1,8 @@
-import boto3
-from flask import Flask, request
+from flask import Flask, request, jsonify
+
+from exceptions import CustomException
+import users
+
 app = Flask(__name__)
 
 @app.route("/")
@@ -14,13 +17,28 @@ def test():
     print (password)
     return ('test',401)
 
-@app.route('/hello', methods=['POST'])
-def test():
-    username=request.json['username']
-    print (username)
-    password=request.json['password']
-    print (password)
-    return ('test',401)
+@app.route('/users/<username>')
+def get_user(username):
+    try:
+        user = users.get_users(str(username)).pop()
+    except IndexError:
+        raise CustomException(
+            status_code=404,
+            message="User Not Found"
+            )
+    except Exception as e:
+        raise CustomException(
+            status_code=500,
+            message="Server Error"
+            )
+
+    return jsonify(user)
+
+@app.errorhandler(CustomException)
+def error_handler(error):
+    response = jsonify(error.to_dict())
+    response.status_code = error.status_code
+    return response
 
 if __name__ == "__main__":
     app.run(debug=True)
