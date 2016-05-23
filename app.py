@@ -1,26 +1,33 @@
 from flask import Flask, request, jsonify
 
 from exceptions import CustomException
-import users
-
+from users import get_users,create_user,update_user
 app = Flask(__name__)
 
 @app.route("/")
 def defalt():
-    return "shalom!!!!!!"
+    return "Hello"
 
-@app.route('/hello', methods=['POST'])
-def test():
-    username=request.json['username']
-    print (username)
-    password=request.json['password']
-    print (password)
-    return ('test',401)
+@app.route('/users', methods=['POST'])
+def create_user():
+    usernmae=request.json['usernmae']
+    publicInfo=request.json['publicInfo']
+    protectedInfo=request.json['protectedInfo']
+    privateInfo=request.json['privateInfo']
+    userType=request.json['userType']
+    table = dynamodb.Table('Users')
+    response = table.put_item(
+     Item={
+        'UserId': usernmae,
+        'UserType': userType,
+     })
+    return ('success',201)
 
-@app.route('/users/<username>')
+@app.route('/users/<username>', methods=['GET'])
+
 def get_user(username):
     try:
-        user = users.get_users(str(username)).pop()
+        user = username
     except IndexError:
         raise CustomException(
             status_code=404,
@@ -32,7 +39,7 @@ def get_user(username):
             message="Server Error"
             )
 
-    return jsonify(user)
+    return (username,401)
 
 @app.errorhandler(CustomException)
 def error_handler(error):
@@ -47,33 +54,6 @@ import json
 dynamodb = boto3.resource('dynamodb')
 from boto3.dynamodb.conditions import Key, Attr
 
-table = dynamodb.create_table(
-    TableName='TriageIQUsers',
-    KeySchema=[
-        {
-            'AttributeName': 'UserId',
-            'KeyType': 'HASH'  #Partition key
-        },
-        {
-            'AttributeName': 'UserType',
-            'KeyType': 'RANGE'  #Sort key
-        }
-    ],
-    AttributeDefinitions=[
-        {
-            'AttributeName': 'UserId',
-            'AttributeType': 'S'
-        },
-        {
-            'AttributeName': 'UserType',
-            'AttributeType': 'S'
-        },
-    ],
-    ProvisionedThroughput={
-        'ReadCapacityUnits': 1,
-        'WriteCapacityUnits': 1
-    }
-)
 print("Table status:", table.table_status)
 
 table = dynamodb.Table('TriageIQUsers')
