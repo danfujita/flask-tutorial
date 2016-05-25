@@ -1,12 +1,17 @@
 import boto3
 from flask import Flask, request, jsonify
+import boto3
+from boto3.dynamodb.conditions import Key, Attr
 
+dynamodb = boto3.resource('dynamodb')
 
-def get_users(username):
+def call_get_users(username):
+    table = dynamodb.Table('Users')
     response = table.query(
-        KeyConditionExpression=Key('UserId').eq(username)
+    KeyConditionExpression=Key('username').eq(username)
     )
-    return response['Items']
+    for i in response['Items']:
+        return i
 
 def create_user(username):
    return
