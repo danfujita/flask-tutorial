@@ -1,6 +1,6 @@
 from flask import Flask, request, jsonify
 from exceptions import CustomException
-from users import call_get_users,create_user,update_user
+from users import get_users_db,create_user_db,update_user_db
 
 import boto3
 from boto3.dynamodb.conditions import Key, Attr
@@ -8,29 +8,20 @@ from boto3.dynamodb.conditions import Key, Attr
 
 app = Flask(__name__)
 
-@app.route("/")
-def defalt():
-    return "Hello"
-
 @app.route('/users', methods=['POST'])
 def create_user():
     try:
         usernmae=request.json['usernmae']
+        userType=request.json['userType']
         publicInfo=request.json['publicInfo']
         protectedInfo=request.json['protectedInfo']
         privateInfo=request.json['privateInfo']
-        userType=request.json['userType']
-        table = dynamodb.Table('Users')
-        response = table.put_item(
-        Item={
-            'UserId': usernmae,
-            'UserType': userType,
-            })
+        create_user_db(usernmae,userType,publicInfo,protectedInfo,privateInfo)
     except Exception as e:
         raise CustomException(
             status_code=500,
             message="Server Error")
-            return
+        return
     user = {'status':'success'}
     return (user,201)
 
@@ -38,7 +29,7 @@ def create_user():
 def get_user(username):
     user = {}
     try:
-        user = call_get_users(username)
+        user = get_users_db(username)
         return (jsonify(user),201)
 
     except IndexError:
@@ -53,25 +44,23 @@ def get_user(username):
             message="Server Error"
             )
         return
-@app.route('/users/<username>', methods=['PUT'])
-def get_user(username):
-    user = {}
+
+@app.route('/users', methods=['PUT'])
+def put_user(username):
     try:
-        user = call_get_users(username)
-        return (jsonify(user),201)
-
-    except IndexError:
-        raise CustomException(
-            status_code=404,
-            message="User Not Found"
-            )
-        return
+        usernmae=request.json['usernmae']
+        userType=request.json['userType']
+        publicInfo=request.json['publicInfo']
+        protectedInfo=request.json['protectedInfo']
+        privateInfo=request.json['privateInfo']
+        update_user_db(usernmae,userType,publicInfo,protectedInfo,privateInfo)
     except Exception as e:
         raise CustomException(
             status_code=500,
-            message="Server Error"
-            )
+            message="Server Error")
         return
+    user = {'status':'success'}
+    return (user,201)
 
 @app.errorhandler(CustomException)
 def error_handler(error):
@@ -83,33 +72,3 @@ def error_handler(error):
 
 if __name__ == "__main__":
     app.run(debug=True)
-'''
-import json
-dynamodb = boto3.resource('dynamodb')
-from boto3.dynamodb.conditions import Key, Attr
-
-print("Table status:", table.table_status)
-
-table = dynamodb.Table('TriageIQUsers')
-
-UserId = "danfujita"
-UserType = "doctor"
-
-response = table.put_item(
-   Item={
-        'UserId': UserId,
-        'UserType': UserType,
-    }
-)
-
-table = dynamodb.Table('TriageIQUsers')
-
-print("Movies from 1985")
-
-response = table.query(
-    KeyConditionExpression=Key('UserId').eq("danfujita")
-)
-
-for i in response['Items']:
-    print(i)
-'''
