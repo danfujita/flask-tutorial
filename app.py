@@ -1,9 +1,9 @@
 from flask import Flask, request, jsonify
 from exceptions import CustomException
 from users import get_users_db,create_user_db,update_user_db
-
 import boto3
 from boto3.dynamodb.conditions import Key, Attr
+
 
 
 app = Flask(__name__)
