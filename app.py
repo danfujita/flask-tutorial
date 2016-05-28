@@ -1,6 +1,6 @@
 from flask import Flask, request, jsonify
 from exceptions import CustomException
-from users import get_users_db,create_user_db,update_user_db
+import users
 import boto3
 from boto3.dynamodb.conditions import Key, Attr
 
@@ -16,7 +16,7 @@ def create_user():
         publicInfo=request.json['publicInfo']
         protectedInfo=request.json['protectedInfo']
         privateInfo=request.json['privateInfo']
-        create_user_db(usernmae,userType,publicInfo,protectedInfo,privateInfo)
+        users.create_user_in_db(usernmae,userType,publicInfo,protectedInfo,privateInfo)
     except Exception as e:
         raise CustomException(
             status_code=500,
@@ -29,7 +29,7 @@ def create_user():
 def get_user(username):
     user = {}
     try:
-        user = get_users_db(username)
+        user = users.get_users_from_db(username)
         return (jsonify(user),201)
 
     except IndexError:
@@ -53,7 +53,7 @@ def put_user(username):
         publicInfo=request.json['publicInfo']
         protectedInfo=request.json['protectedInfo']
         privateInfo=request.json['privateInfo']
-        update_user_db(usernmae,userType,publicInfo,protectedInfo,privateInfo)
+        users.update_user_in_db(usernmae,userType,publicInfo,protectedInfo,privateInfo)
     except Exception as e:
         raise CustomException(
             status_code=500,
