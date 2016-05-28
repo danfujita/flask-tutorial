@@ -12,32 +12,30 @@ def get_users_from_db(username):
         )
     return [user for user in response['Items']]
 
-def create_user_in_db(username,userType,publicInfo,protectedInfo,privateInfo):
+def create_user_in_db(username, user_type, public_info, protected_info, private_info):
     table = dynamodb.Table('Users')
     response = table.put_item(
         Item={
-            'username': usernmae,
-            'usertype': userType,
-            'publicInfo': publicInfo,
-            'protectedInfo': protectedInfo,
-            'privateInfo': privateInfo,
+            'username': username,
+            'usertype': user_type,
+            'publicInfo': public_info,
+            'protectedInfo': protected_info,
+            'privateInfo': private_info,
             },
         )
-    return
 
-def update_user_in_db(username,userType,publicInfo,protectedInfo,privateInfo):
+def update_user_in_db(username, user_type, public_info, protected_info, private_info):
     table = dynamodb.Table('Users')
     response = table.update_item(
         Key={
-            'username': usernmae,
+            'username': username,
             },
         UpdateExpression="set info.rating = :r, info.plot=:p, info.actors=:a",
         ExpressionAttributeValues={
-            ':usertype': userType,
-            ':publicInfo': publicInfo,
-            ':protectedInfo': protectedInfo,
-            ':privateInfo': privateInfo,
+            ':usertype': user_type,
+            ':publicInfo': public_info,
+            ':protectedInfo': protected_info,
+            ':privateInfo': private_info,
             },
         ReturnValues="UPDATED_NEW",
         )
-    return
