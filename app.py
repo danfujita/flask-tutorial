@@ -1,6 +1,6 @@
 from flask import Flask, request, jsonify
 from exceptions import CustomException
-from users
+import users
 import boto3
 from boto3.dynamodb.conditions import Key, Attr
 
